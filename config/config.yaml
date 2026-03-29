@@ -1,0 +1,45 @@
+project:
+  name: langchain_rag
+  topic: 电商售后客服
+
+crawler:
+  headers:
+    User-Agent: Mozilla/5.0
+  timeout: 20
+  save_dir: data/raw
+
+vector_db:
+  persist_directory: data/chroma_db
+  collection_name: after_sales_kb
+
+embedding:
+  model_name: moka-ai/m3e-base
+  device: cpu
+  normalize_embeddings: true
+
+splitter:
+  chunk_size: 350
+  chunk_overlap: 80
+  separators:
+    - "\n\n"
+    - "\n"
+    - "。"
+    - "！"
+    - "？"
+    - "；"
+    - "，"
+    - " "
+    - ""
+
+llm:
+  provider: zhipu
+  model_name: zai-org/GLM-4.5V
+  api_key: "xxx"
+  base_url: "xxx"
+
+seed_urls:
+  - "https://help.jd.com/user/issue/118-265.html"
+  - "https://help.jd.com/user/issue/321-4434.html"
+  - "https://help.jd.com/user/issue/130-262.html"
+retrieval:
+  top_k: 3

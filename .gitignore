@@ -1,0 +1,12 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project runtime outputs
+data/raw/
+data/chroma_db/
+retrieval.py
+# Local config / secrets
+config/config_local.yaml
+.env
