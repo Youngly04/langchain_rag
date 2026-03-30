@@ -1,9 +1,8 @@
 from pathlib import Path
-import shutil
-
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
+
 from langchain_chroma import Chroma
 
 from utils import load_config
@@ -11,7 +10,9 @@ from utils import load_config
 
 def load_markdown_docs(raw_dir: Path):
     docs = []
+
     for path in raw_dir.glob("*.md"):
+        
         text = path.read_text(encoding="utf-8").strip()
         if not text:
             continue
@@ -26,9 +27,11 @@ def load_markdown_docs(raw_dir: Path):
 
 
 def main():
+
     cfg = load_config()
 
     raw_dir = Path(cfg["crawler"]["save_dir"])
+
     persist_directory = cfg["vector_db"]["persist_directory"]
     collection_name = cfg["vector_db"]["collection_name"]
 
@@ -40,9 +43,12 @@ def main():
     chunk_overlap = cfg["splitter"]["chunk_overlap"]
     separators = cfg["splitter"]["separators"]
 
+    if not raw_dir.exists():
+        raise ValueError(f"原始文档目录不存在：{raw_dir}")
+
     docs = load_markdown_docs(raw_dir)
     if not docs:
-        raise ValueError("data/raw 目录下没有可用文档，请先运行 crawler.py。")
+        raise ValueError(f"{raw_dir} 目录下没有可用文档，请先运行 crawler.py。")
 
     print(f"原始文档数: {len(docs)}")
 
@@ -58,11 +64,6 @@ def main():
         chunk.metadata["chunk_id"] = idx
 
     print(f"切块后数量: {len(chunks)}")
-
-    db_path = Path(persist_directory)
-    if db_path.exists():
-        shutil.rmtree(db_path)
-        print(f"已删除旧向量库: {db_path}")
 
     embedding = HuggingFaceEmbeddings(
         model_name=embed_model_name,

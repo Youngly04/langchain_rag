@@ -4,7 +4,6 @@ from langchain_openai import ChatOpenAI
 
 from utils import load_config
 
-
 def format_context(results):
     context_parts = []
     references = []
@@ -30,16 +29,12 @@ def format_context(results):
 
 def main():
     cfg = load_config()
-
     persist_directory = cfg["vector_db"]["persist_directory"]
     collection_name = cfg["vector_db"]["collection_name"]
-
     embed_model_name = cfg["embedding"]["model_name"]
     embed_device = cfg["embedding"]["device"]
     normalize_embeddings = cfg["embedding"]["normalize_embeddings"]
-
     top_k = cfg["retrieval"]["top_k"]
-
     llm_model_name = cfg["llm"]["model_name"]
     llm_api_key = cfg["llm"]["api_key"]
     llm_base_url = cfg["llm"]["base_url"]
