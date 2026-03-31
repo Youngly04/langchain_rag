@@ -16,11 +16,22 @@ def load_markdown_docs(raw_dir: Path):
         text = path.read_text(encoding="utf-8").strip()
         if not text:
             continue
+        stem = path.stem
 
+        if "_" in stem:
+            category, title = stem.split("_", 1)
+        else:
+            category = "未分类"
+            title = stem
         docs.append(
             Document(
                 page_content=text,
-                metadata={"source": path.name}
+                metadata={
+                        "source": path.name,
+                        "title": title,
+                        "category": category,
+                        "platform": "京东",
+                    }
             )
         )
     return docs
@@ -84,7 +95,12 @@ def main():
     print("\n===== 示例切块 =====")
     for i, chunk in enumerate(chunks[:3], 1):
         print(f"\n[Chunk {i}]")
-        print(f"source={chunk.metadata.get('source')}, chunk_id={chunk.metadata.get('chunk_id')}")
+        print(
+            f"source={chunk.metadata.get('source')}, "
+            f"title={chunk.metadata.get('title')}, "
+            f"category={chunk.metadata.get('category')}, "
+            f"chunk_id={chunk.metadata.get('chunk_id')}"
+        )
         print(chunk.page_content[:300])
 
 

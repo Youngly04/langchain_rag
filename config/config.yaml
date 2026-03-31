@@ -20,16 +20,7 @@ embedding:
 splitter:
   chunk_size: 350
   chunk_overlap: 80
-  separators:
-    - "\n\n"
-    - "\n"
-    - "。"
-    - "！"
-    - "？"
-    - "；"
-    - "，"
-    - " "
-    - ""
+  separators : ["\n\n", "\n", "。", "！", "？", "；", "：", ""]
 
 llm:
   provider: zhipu
@@ -37,9 +28,23 @@ llm:
   api_key: "xxx"
   base_url: "xxx"
 
-seed_urls:
-  - "https://help.jd.com/user/issue/118-265.html"
-  - "https://help.jd.com/user/issue/321-4434.html"
-  - "https://help.jd.com/user/issue/130-262.html"
+seed_pages:
+  - name: "售后申请_退换货流程"
+    url: "https://help.jd.com/user/issue/118-265.html"
+
+  - name: "退款规则_退款去向"
+    url: "https://help.jd.com/user/issue/130-262.html"
+
+  - name: "质量问题_商品质量处理"
+    url: "https://help.jd.com/user/issue/118-453.html"
+
+  - name: "运费规则_售后运费说明"
+    url: "https://help.jd.com/user/issue/131-496.html"
+
+  - name: "维修服务_保外检测维修"
+    url: "https://help.jd.com/user/issue/321-4508.html"
+
+  - name: "质保服务_一年质保说明"
+    url: "https://help.jd.com/user/issue/942-4567.html"
 retrieval:
-  top_k: 3
+  top_k: 4
