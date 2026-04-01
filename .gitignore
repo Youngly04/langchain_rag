@@ -6,6 +6,7 @@ __pycache__/
 # Project runtime outputs
 data/raw/
 data/chroma_db/
+data/eval/
 retrieval.py
 # Local config / secrets
 config/config_local.yaml
