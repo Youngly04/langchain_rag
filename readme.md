@@ -54,3 +54,8 @@ python rag.py
 ```
 
 输入 `q` 可以退出程序。
+
+
+
+### 4. 启动 api 
+pip install fastapi uvicorn

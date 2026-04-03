@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能聊天助手</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-bg"></div>
+
+  <div class="chat-wrapper">
+    <div class="chat-card">
+      <div class="chat-header">
+        <div class="header-left">
+          <div class="logo">AI</div>
+          <div>
+            <div class="title">智能聊天助手</div>
+            <div class="subtitle">已连接你的微调模型</div>
+          </div>
+        </div>
+        <button id="clear-btn" class="clear-btn">清空对话</button>
+      </div>
+
+      <div id="chat-box" class="chat-box">
+        <div class="message bot">
+          <div class="avatar bot-avatar">AI</div>
+          <div class="bubble bot-bubble">
+            你好，我已经准备好了。你可以直接开始提问。
+          </div>
+        </div>
+      </div>
+
+      <div class="input-panel">
+        <textarea
+          id="user-input"
+          placeholder="请输入你的问题..."
+          rows="1"
+        ></textarea>
+        <button id="send-btn">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

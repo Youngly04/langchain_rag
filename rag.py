@@ -1,16 +1,19 @@
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
+from reranker import HuggingFaceReranker, RerankCandidate, resolve_rerank_model_name
 
 from utils import load_config
 
-def format_context(results):
+def format_context(retrieved):
     context_parts = []
     references = []
 
-    for i, (doc, score) in enumerate(results, 1):
-        source = doc.metadata.get("source")
-        chunk_id = doc.metadata.get("chunk_id")
+    for i, item in enumerate(retrieved, 1):
+        source = item.get("source")
+        chunk_id = item.get("chunk_id")
+        score = item.get("rerank_score", item.get("original_score"))
+
         references.append(
             {
                 "rank": i,
@@ -21,10 +24,11 @@ def format_context(results):
         )
 
         context_parts.append(
-            f"[参考片段 {i} | source={source} | chunk_id={chunk_id}]\n{doc.page_content}"
+            f"[参考片段{i} | source={source} | chunk_id={chunk_id}]\n{item['page_content']}"
         )
 
     return "\n\n--------------------\n\n".join(context_parts), references
+
 
 
 def main():
@@ -38,6 +42,10 @@ def main():
     llm_model_name = cfg["llm"]["model_name"]
     llm_api_key = cfg["llm"]["api_key"]
     llm_base_url = cfg["llm"]["base_url"]
+    #reranker
+    rerank_enabled = True
+    rerank_model = "bce-base"
+    rerank_candidates = 10
 
     if not llm_api_key or llm_api_key == "你的智谱API Key":
         raise ValueError("请先在 config/config.yaml 中填写正确的智谱 API Key。")
@@ -60,7 +68,14 @@ def main():
         base_url=llm_base_url,
         temperature=0,
     )
-
+    reranker = None
+    if rerank_enabled:
+        reranker = HuggingFaceReranker(
+            model_name=resolve_rerank_model_name(rerank_model),
+            device=embed_device,
+        )
+    if reranker and rerank_candidates < top_k:
+        raise ValueError("rerank_candidates 不能小于 top_k")
     print("RAG 问答已启动，输入 q 退出。")
 
     while True:
@@ -73,13 +88,46 @@ def main():
             print("问题不能为空，请重新输入。")
             continue
 
-        results = vector_store.similarity_search_with_score(question, k=top_k)
+        # results = vector_store.similarity_search_with_score(question, k=top_k)
+        search_k = rerank_candidates if reranker else top_k
+        results = vector_store.similarity_search_with_score(question, k=search_k)
 
         if not results:
             print("没有检索到结果。")
             continue
-
-        context_text, references = format_context(results)
+        initial_retrieved = []
+        for rank, (doc, score) in enumerate(results, start=1):
+            initial_retrieved.append(
+                RerankCandidate(
+                    source=doc.metadata.get("source"),
+                    chunk_id=doc.metadata.get("chunk_id"),
+                    page_content=doc.page_content,
+                    original_score=float(score),
+                    original_rank=rank,
+                    preview=doc.page_content[:120].replace("\n", " "),
+                )
+            )
+        if reranker:
+            reranked_results = reranker.rerank(
+                query=question,
+                candidates=initial_retrieved,
+                top_n=top_k,
+            )
+        else:
+            reranked_results = [
+                {
+                    "rank": candidate.original_rank,
+                    "rerank_score": candidate.original_score,
+                    "source": candidate.source,
+                    "chunk_id": candidate.chunk_id,
+                    "page_content": candidate.page_content,
+                    "original_score": candidate.original_score,
+                    "original_rank": candidate.original_rank,
+                }
+                for candidate in initial_retrieved[:top_k]
+            ]
+        # context_text, references = format_context(results)
+        context_text, references = format_context(reranked_results)
 
         prompt = f"""
         你是一名电商售后客服知识库助手，负责根据知识库内容回答用户关于退货、换货、退款、维修、质保、运费等问题。
