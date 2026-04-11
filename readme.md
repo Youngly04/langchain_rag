@@ -58,4 +58,8 @@ python rag.py
 
 
 ### 4. 启动 api 
+```bash
 pip install fastapi uvicorn
+uvicorn api:app --host 0.0.0.0 --port 8010
+```
+
